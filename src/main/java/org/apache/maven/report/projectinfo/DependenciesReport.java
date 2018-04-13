@@ -28,8 +28,8 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.util.Locale;
+
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.metadata.RepositoryMetadataManager;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
@@ -38,11 +38,14 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
+import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.report.projectinfo.dependencies.Dependencies;
 import org.apache.maven.report.projectinfo.dependencies.DependenciesReportConfiguration;
 import org.apache.maven.report.projectinfo.dependencies.RepositoryUtils;
 import org.apache.maven.report.projectinfo.dependencies.renderer.DependenciesRenderer;
+import org.apache.maven.repository.RepositorySystem;
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilder;
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilderException;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
@@ -55,7 +58,6 @@ import org.codehaus.plexus.util.ReaderFactory;
  *
  * @author <a href="mailto:jason@maven.org">Jason van Zyl </a>
  * @author <a href="mailto:vincent.siveton@gmail.com">Vincent Siveton </a>
- * @version $Id$
  * @since 2.0
  */
 @Mojo( name = "dependencies", requiresDependencyResolution = ResolutionScope.TEST )
@@ -75,7 +77,7 @@ public class DependenciesReport
      * Maven Project Builder component.
      */
     @Component
-    private MavenProjectBuilder mavenProjectBuilder;
+    private ProjectBuilder projectBuilder;
 
     /**
      * Artifact metadata source component.
@@ -113,7 +115,7 @@ public class DependenciesReport
      * @since 2.1
      */
     @Component
-    private ArtifactFactory artifactFactory;
+    private RepositorySystem repositorySystem;
 
     // ----------------------------------------------------------------------
     // Mojo parameters
@@ -158,11 +160,16 @@ public class DependenciesReport
         {
             getLog().error( "Cannot copy ressources", e );
         }
+        
+        ProjectBuildingRequest buildingRequest =
+            new DefaultProjectBuildingRequest( getSession().getProjectBuildingRequest() );
+        buildingRequest.setLocalRepository( localRepository );
+        buildingRequest.setRemoteRepositories( remoteRepositories );
 
-        @SuppressWarnings( "unchecked" ) RepositoryUtils repoUtils =
-            new RepositoryUtils( getLog(), mavenProjectBuilder, factory, resolver,
+        RepositoryUtils repoUtils =
+            new RepositoryUtils( getLog(), projectBuilder, repositorySystem, resolver,
                                  project.getRemoteArtifactRepositories(), project.getPluginArtifactRepositories(),
-                                 localRepository, repositoryMetadataManager );
+                                 buildingRequest, repositoryMetadataManager );
 
         DependencyNode dependencyNode = resolveProject();
 
@@ -173,8 +180,8 @@ public class DependenciesReport
 
         DependenciesRenderer r =
             new DependenciesRenderer( getSink(), locale, getI18N( locale ), getLog(), dependencies,
-                                      dependencyNode, config, repoUtils, artifactFactory, mavenProjectBuilder,
-                                      remoteRepositories, localRepository );
+                                      dependencyNode, config, repoUtils, repositorySystem, projectBuilder,
+                                      buildingRequest );
         r.render();
     }
 
