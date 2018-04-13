@@ -560,6 +560,7 @@ under the License.
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
             <configuration>
+              <streamLogs>true</streamLogs> <!-- JDK10 analysis -->
               <ignoreFailures>${maven.invoker.failure.ignore}</ignoreFailures>
               <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
               <pomIncludes>
