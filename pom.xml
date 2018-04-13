@@ -122,6 +122,7 @@ under the License.
     <mavenVersion>3.0</mavenVersion>
     <scmVersion>1.9.5</scmVersion>
     <sitePluginVersion>3.5.1</sitePluginVersion>
+    <surefire.version>2.21.0</surefire.version>
   </properties>
 
   <dependencies>
