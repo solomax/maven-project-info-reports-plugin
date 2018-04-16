@@ -30,7 +30,6 @@ import java.io.OutputStream;
 import java.util.Locale;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.metadata.ArtifactMetadataSource;
 import org.apache.maven.artifact.repository.metadata.RepositoryMetadataManager;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.resolver.filter.ScopeArtifactFilter;
@@ -78,12 +77,6 @@ public class DependenciesReport
      */
     @Component
     private ProjectBuilder projectBuilder;
-
-    /**
-     * Artifact metadata source component.
-     */
-    @Component
-    protected ArtifactMetadataSource artifactMetadataSource;
 
     /**
      * Dependency graph builder component.
